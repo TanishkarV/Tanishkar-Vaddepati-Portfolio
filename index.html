@@ -41,16 +41,23 @@
   .view{display:none;}
   .view.active{display:block;}
 
-  .home-grid{display:grid;grid-template-columns:150px 1fr;gap:40px;align-items:start;max-width:900px;}
+  .home-grid{display:grid;grid-template-columns:150px 1fr 270px;gap:40px;align-items:start;}
   .avatar{width:150px;height:150px;border-radius:50%;border:1px solid var(--border);position:relative;overflow:hidden;
     background:repeating-radial-gradient(circle, rgba(79,209,232,0.10) 0px, rgba(79,209,232,0.10) 1px, transparent 1px, transparent 22px),var(--panel);
     display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:34px;color:var(--accent);}
-  .avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;}
   .avatar::before{content:'';position:absolute;inset:0;z-index:2;
     background:conic-gradient(from 0deg, transparent 0deg, rgba(255,177,61,0.5) 22deg, transparent 55deg);
     animation:sweep 4.5s linear infinite;}
   .avatar span{position:relative;z-index:1;}
   @keyframes sweep{to{transform:rotate(360deg);}}
+  .home-grid > div{min-width:0;}
+  .portrait-wrap{position:relative;width:270px;}
+  .portrait-wrap::before,.portrait-wrap::after{content:'';position:absolute;width:22px;height:22px;z-index:3;pointer-events:none;}
+  .portrait-wrap::before{top:-7px;left:-7px;border-top:2px solid var(--accent);border-left:2px solid var(--accent);}
+  .portrait-wrap::after{bottom:-7px;right:-7px;border-bottom:2px solid var(--accent);border-right:2px solid var(--accent);}
+  .portrait{overflow:hidden;border:1px solid var(--border);border-radius:3px;background:var(--panel);}
+  .portrait img{display:block;width:100%;height:auto;}
+  .portrait-fallback{display:none;aspect-ratio:9/16;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);}
   .name{font-family:'JetBrains Mono',monospace;font-size:28px;margin:0 0 6px;color:var(--text);}
   .role{color:var(--text-dim);font-size:15px;margin:0 0 20px;}
   .bio{font-size:15.5px;line-height:1.7;color:var(--text);max-width:60ch;}
@@ -120,19 +127,24 @@
   .detail::-webkit-scrollbar-thumb, .side::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 
   .ticker{position:fixed;bottom:0;left:0;right:0;height:30px;background:rgba(10,14,19,0.95);border-top:1px solid var(--border);overflow:hidden;z-index:10;}
-  .ticker-track{display:inline-flex;white-space:nowrap;align-items:center;height:30px;animation:tick 24s linear infinite;
+  .ticker-track{display:inline-flex;white-space:nowrap;align-items:center;height:30px;animation:tick 40s linear infinite;
     font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:0.5px;}
   .ticker-track span{margin-right:48px;}
   .ticker-track span.hl{color:var(--accent);}
   @keyframes tick{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 
+  @media(max-width:1020px){
+    .home-grid{grid-template-columns:150px 1fr;}
+    .portrait-wrap{grid-column:1 / -1;margin:8px auto 0;}
+  }
   @media(max-width:800px){
     .split{height:auto;grid-template-columns:1fr;}
     .side{max-height:200px;border-right:none;border-bottom:1px solid var(--border);}
     .detail{max-height:70vh;}
   }
   @media(max-width:640px){
-    .home-grid{grid-template-columns:1fr;}
+    .home-grid{grid-template-columns:minmax(0,1fr);gap:36px;}
+    .portrait-wrap{width:min(100%,300px);}
     header{padding:14px 16px;}
     .met{padding-left:0;width:100%;order:3;}
     nav button{padding:8px 10px;font-size:10.5px;}
@@ -160,10 +172,7 @@
 <main>
   <section id="home" class="view active">
     <div class="home-grid">
-      <div class="avatar">
-        <img src="photo.jpg" alt="Tanishkar Vaddepati" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none'">
-        <span>TV</span>
-      </div>
+      <div class="avatar"><span>TV</span></div>
       <div>
         <h1 class="name">Tanishkar Vaddepati</h1>
         <p class="role">Mechanical Engineering, Texas A&amp;M University</p>
@@ -193,6 +202,13 @@
           </div>
           <div class="mission-title" id="mission-title">GLIDER PROJECT TOUCHDOWN &rarr; NEW BUILD IGNITION</div>
           <div class="mission-sub" id="mission-sub">The deployable-wing glider is wrapping up. When this clock hits zero, it lands in the books and the next build lights up.</div>
+        </div>
+      </div>
+      <div class="portrait-wrap">
+        <div class="portrait">
+          <img src="photo.jpg" alt="Tanishkar Vaddepati standing beneath the Saturn V first-stage engines"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="portrait-fallback">+ photo.jpg</div>
         </div>
       </div>
     </div>
@@ -256,21 +272,6 @@ function tickClock(){
 tickClock();
 setInterval(tickClock, 1000);
 
-const tickerItems = [
-  "SYSTEM STATUS: NOMINAL","NEXT MISSION: INBOUND","ACTIVE PROJECTS: 7","STRUCTURAL MARGIN: WITHIN TOLERANCE",
-  "TAMU SOUNDING ROCKETRY: TARGET APOGEE 11,500 FT","RASC-AL: NATIONAL FINALIST",
-  "FABRICATION: 3D PRINTING / COMPOSITES / MACHINING","TELEMETRY LINK: ACTIVE"
-];
-const track = document.getElementById('ticker');
-for(let r=0;r<2;r++){
-  tickerItems.forEach((t,i)=>{
-    const span = document.createElement('span');
-    if(i%3===0) span.className='hl';
-    span.textContent = t;
-    track.appendChild(span);
-  });
-}
-
 // status: "active" | "complete" | "standby"
 const STATUS_LABEL = {active:"ACTIVE", complete:"MISSION COMPLETE", standby:"STANDBY / NOT STARTED"};
 
@@ -301,7 +302,7 @@ const projects = [
    photos:[{caption:"Add a caption for this photo."},{caption:"Add a caption for this photo."},{caption:"Add a caption for this photo."}]},
   {slug:"biofilament", title:"Biofilament & Microstructure Research", meta:"Researcher · Lightweight space structures", status:"active", tools:["SolidWorks","ABAQUS","3D Printing","Bio-based PLA"],
    body:[
-    "Designing 3D-printed, bio-based PLA microstructures for lightweight space structures: curved, shell-based lattices built to carry more load per gram than conventional solid-infill PLA, which is the benchmark every design is measured against.",
+    "Designing 3D-printed, bio-based PLA microstructures for lightweight space structures: curved, shell-based gyroid and primitive lattices built to carry more load per gram than conventional solid-infill PLA, which is the benchmark every design is measured against.",
     "Each lattice is tuned around a relative density of about 20%, unit cells of 5\u201310 mm, and 1.2 mm walls. I model the geometry in SolidWorks, then run FEA in ABAQUS to predict stress distribution and buckling behavior. The design targets are a 30 MPa stress limit and a buckling load at least 1.5\u20132\u00d7 the expected compressive load.",
     "The goal is a measurable win in specific stiffness and specific strength (stiffness-to-mass and strength-to-mass) over solid-infill PLA, checked by printing the lattices and testing them mechanically."],
    photos:[
@@ -314,19 +315,25 @@ const projects = [
 ];
 
 const skills = [
-  {title:"CAD & Mechanical Design", meta:"SolidWorks · Fusion 360",
-   experience:"Comfortable taking a concept from an initial sketch through a fully toleranced assembly, iterating quickly between CAD and 3D-printed prototypes to validate fit and function before committing to final geometry.",
+  {title:"CAD & Mechanical Design", meta:"SolidWorks \u00b7 Fusion 360",
+   experience:"Take a part from first sketch to a printable or machinable model. SolidWorks for rocket airframes, deployment mechanisms, and lattice geometry; Fusion 360 for the pneumatic engine. I move quickly between CAD and 3D-printed prototypes to check fit and function before committing to final geometry.",
    projects:["Deployable-Wing Glider Rocket","Pneumatic Piston Engine","TAMU Sounding Rocketry","Biofilament & Microstructure Research"]},
-  {title:"Simulation & FEA", meta:"ANSYS · ABAQUS",
-   experience:"Run structural and thermal FEA to validate designs before fabrication, balancing structural margin against mass and manufacturability constraints.",
+  {title:"Simulation & FEA", meta:"ANSYS \u00b7 ABAQUS",
+   experience:"Use FEA to predict stress distribution and buckling before anything gets built, then size geometry against stress limits and buckling margins while balancing mass and manufacturability. ANSYS on the rocket airframe; ABAQUS on lattice microstructures.",
    projects:["TAMU Sounding Rocketry","Biofilament & Microstructure Research"]},
+  {title:"Flight Simulation", meta:"OpenRocket",
+   experience:"Model rocket configurations in OpenRocket and feed structural mass estimates into the trajectory simulations that drive motor selection and apogee predictions, so the structure and the flight plan are designed together.",
+   projects:["TAMU Sounding Rocketry"]},
   {title:"Programming", meta:"Python",
-   experience:"Write Python to build simulation logic and real-time data pipelines — including deriving physical quantities from first-principles equations and streaming them to a live UI.",
+   experience:"Write Python for simulation logic and real-time data pipelines: deriving quantities like fuel consumption from first-principles equations and streaming live telemetry (velocity, orientation, angular rate, position) to a UI.",
    projects:["Space Teams Pro"]},
-  {title:"Fabrication", meta:"3D Printing · Composites · Machining",
-   experience:"Hands-on across additive manufacturing, composite layups, and metal machining — comfortable taking a part from a CAD file to something that actually flies, spins, or drives.",
-   projects:["Deployable-Wing Glider Rocket","Pneumatic Piston Engine","TAMU Sounding Rocketry","VEX Robotics"]},
-  {title:"Languages", meta:"English · Telugu · Hindi",
+  {title:"Fabrication", meta:"3D Printing \u00b7 Composites \u00b7 Machining",
+   experience:"Hands-on across additive manufacturing, composite layups, and metal machining. I take a part from a CAD file to something that actually flies, spins, or drives, and pick the process and joining method that suits each part.",
+   projects:["Deployable-Wing Glider Rocket","Pneumatic Piston Engine","TAMU Sounding Rocketry","Biofilament & Microstructure Research","VEX Robotics"]},
+  {title:"Systems Engineering & Leadership", meta:"Design Reviews \u00b7 Integration \u00b7 Technical Writing",
+   experience:"Lead engineering teams from requirements through design reviews: 70+ leadership and full-team reviews as systems lead on a 12-person RASC-AL team, an 8-engineer structures team on Valor, and a 5-person VEX team over four years. I keep subsystems aligned on interfaces and the overall mission goal.",
+   projects:["NASA RASC-AL \u2014 Lunar Rover","TAMU Sounding Rocketry","VEX Robotics"]},
+  {title:"Languages", meta:"English \u00b7 Telugu \u00b7 Hindi",
    experience:"Fluent in English, Telugu, and Hindi.",
    projects:[]}
 ];
@@ -396,6 +403,24 @@ function renderSkill(d){
     <h2>${d.title}</h2>
     <p>${d.experience}</p>
     ${d.projects.length ? `<div class="sub-label">Represented in</div><div class="related">${d.projects.map(p=>`<span>${p}</span>`).join('')}</div>` : ''}`;
+}
+
+const activeCount = projects.filter(p=>p.status==='active').length;
+const tickerItems = [
+  {t:"NEXT MISSION: INBOUND", hl:true},
+  {t:`ACTIVE PROJECTS: ${activeCount}`},
+  {t:"TAMU SOUNDING ROCKETRY: TARGET APOGEE 11,500 FT", hl:true},
+  {t:"RASC-AL: NATIONAL FINALIST"},
+  {t:"FABRICATION: 3D PRINTING / COMPOSITES / MACHINING"}
+];
+const track = document.getElementById('ticker');
+for(let r=0;r<6;r++){   // 6 copies so the loop never shows a gap, even on wide screens
+  tickerItems.forEach(item=>{
+    const span = document.createElement('span');
+    if(item.hl) span.className='hl';
+    span.textContent = item.t;
+    track.appendChild(span);
+  });
 }
 
 buildSide('projects-list', projects, renderProject, 'PROJECTS LOG');
