@@ -27,6 +27,7 @@
   .callsign span{color:var(--accent);}
   .met{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-dim);letter-spacing:1px;margin-right:auto;padding-left:24px;}
   .met b{color:var(--accent-2);font-weight:500;}
+  .met .met-label{color:var(--accent);margin-right:8px;}
   nav{display:flex;gap:8px;}
   nav button{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;
     background:var(--panel);color:var(--text-dim);border:1px solid var(--border);padding:9px 16px;
@@ -84,6 +85,8 @@
     display:flex;align-items:center;justify-content:center;}
   .photo-frame img{width:100%;height:100%;object-fit:cover;display:block;}
   .placeholder{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);text-align:center;padding:8px;}
+  .photo-frame.contain{aspect-ratio:4/3;border:1px solid var(--border);background:#EEF0F2;}
+  .photo-frame.contain img{object-fit:contain;}
   .photo-caption{font-size:12.5px;color:var(--text-dim);margin-top:8px;line-height:1.55;}
 
   .status-bar{display:inline-flex;align-items:center;gap:9px;margin-top:28px;padding:9px 15px;
@@ -96,6 +99,22 @@
   .status-bar.complete .status-dot{background:var(--accent-2);box-shadow:0 0 6px var(--accent-2);}
   .status-bar.standby .status-dot{background:var(--text-dim);}
   @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
+
+  .mission{margin-top:34px;padding:18px 22px 20px;border:1px solid var(--border);border-left:2px solid var(--accent);
+    border-radius:3px;background:rgba(16,22,29,0.85);max-width:560px;}
+  .mission-tag{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:1.5px;color:var(--accent);}
+  .mission-tag .status-dot{background:var(--accent);box-shadow:0 0 6px var(--accent);animation:pulse 1.6s ease-in-out infinite;}
+  .mission-clock{display:flex;align-items:flex-start;gap:10px;margin:14px 0 12px;font-family:'JetBrains Mono',monospace;}
+  .mission-sign{font-size:30px;color:var(--text-dim);line-height:1.1;padding-top:1px;}
+  .mission-cell{text-align:center;min-width:56px;}
+  .mission-cell b{display:block;font-size:32px;font-weight:500;color:var(--text);line-height:1.1;letter-spacing:1px;}
+  .mission-cell small{display:block;font-size:9.5px;letter-spacing:1.5px;color:var(--text-dim);margin-top:3px;}
+  .mission-sep{font-size:28px;color:var(--border);line-height:1.15;}
+  .mission-title{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:1px;color:var(--accent-2);}
+  .mission-sub{font-size:13.5px;line-height:1.6;color:var(--text-dim);margin-top:6px;}
+  .mission.live{border-left-color:var(--accent-2);}
+  .mission.live .mission-tag{color:var(--accent-2);}
+  .mission.live .mission-tag .status-dot{background:var(--accent-2);box-shadow:0 0 6px var(--accent-2);}
 
   .detail::-webkit-scrollbar, .side::-webkit-scrollbar{width:6px;}
   .detail::-webkit-scrollbar-thumb, .side::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
@@ -118,6 +137,9 @@
     .met{padding-left:0;width:100%;order:3;}
     nav button{padding:8px 10px;font-size:10.5px;}
     .detail{padding:24px 20px;}
+    .mission{padding:16px;}
+    .mission-cell{min-width:46px;}
+    .mission-cell b{font-size:26px;}
   }
 </style>
 </head>
@@ -127,7 +149,7 @@
 
 <header>
   <div class="callsign">TANISHKAR <span>/</span> VADDEPATI</div>
-  <div class="met">MET <b id="met">T+00:00:00</b></div>
+  <div class="met"><span class="met-label" id="met-label">NEXT MISSION</span><b id="met">T&minus;07:00:00:00</b></div>
   <nav>
     <button class="tab active" data-view="home"><span class="dot"></span>Home</button>
     <button class="tab" data-view="projects"><span class="dot"></span>Projects</button>
@@ -139,7 +161,7 @@
   <section id="home" class="view active">
     <div class="home-grid">
       <div class="avatar">
-        <img src="photo.jpg" alt="Tanishkar Vaddepati" onerror="this.style.display='none'">
+        <img src="photo.jpg" alt="Tanishkar Vaddepati" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none'">
         <span>TV</span>
       </div>
       <div>
@@ -159,6 +181,18 @@
           <a href="mailto:vtanishkar@gmail.com">Email</a>
           <a href="#">LinkedIn</a>
           <a href="#">Resume (PDF)</a>
+        </div>
+        <div class="mission" id="mission">
+          <div class="mission-tag"><span class="status-dot"></span>MISSION CLOCK</div>
+          <div class="mission-clock">
+            <span class="mission-sign" id="m-sign">T&minus;</span>
+            <div class="mission-cell"><b id="m-d">07</b><small>DAYS</small></div><span class="mission-sep">:</span>
+            <div class="mission-cell"><b id="m-h">00</b><small>HRS</small></div><span class="mission-sep">:</span>
+            <div class="mission-cell"><b id="m-m">00</b><small>MIN</small></div><span class="mission-sep">:</span>
+            <div class="mission-cell"><b id="m-s">00</b><small>SEC</small></div>
+          </div>
+          <div class="mission-title" id="mission-title">GLIDER PROJECT TOUCHDOWN &rarr; NEW BUILD IGNITION</div>
+          <div class="mission-sub" id="mission-sub">The deployable-wing glider is wrapping up. When this clock hits zero, it lands in the books and the next build lights up.</div>
         </div>
       </div>
     </div>
@@ -192,18 +226,39 @@ for(let i=0;i<90;i++){
   starsEl.appendChild(s);
 }
 
-const start = Date.now();
-setInterval(()=>{
-  const diff = Math.floor((Date.now()-start)/1000);
-  const h = String(Math.floor(diff/3600)).padStart(2,'0');
-  const m = String(Math.floor((diff%3600)/60)).padStart(2,'0');
-  const s = String(diff%60).padStart(2,'0');
-  document.getElementById('met').textContent = `T+${h}:${m}:${s}`;
-},1000);
+// Countdown target: one week after Oct 1, 2026 (Oct 8, 2026, 12:00 AM local time)
+const LAUNCH = new Date(2026, 9, 8, 0, 0, 0);
+const pad = n => String(n).padStart(2,'0');
+function tickClock(){
+  const diff = LAUNCH - Date.now();
+  const live = diff <= 0;
+  let t = Math.floor(Math.abs(diff)/1000);
+  const d = Math.floor(t/86400); t %= 86400;
+  const h = Math.floor(t/3600);  t %= 3600;
+  const m = Math.floor(t/60);
+  const s = t % 60;
+  const sign = live ? 'T+' : 'T\u2212';
+  document.getElementById('met').textContent = `${sign}${pad(d)}:${pad(h)}:${pad(m)}:${pad(s)}`;
+  document.getElementById('met-label').textContent = live ? 'NEW MISSION' : 'NEXT MISSION';
+  document.getElementById('m-sign').textContent = sign;
+  document.getElementById('m-d').textContent = pad(d);
+  document.getElementById('m-h').textContent = pad(h);
+  document.getElementById('m-m').textContent = pad(m);
+  document.getElementById('m-s').textContent = pad(s);
+  document.getElementById('mission').classList.toggle('live', live);
+  document.getElementById('mission-title').textContent = live
+    ? 'GLIDER PROJECT COMPLETE \u2192 NEW MISSION ACTIVE'
+    : 'GLIDER PROJECT TOUCHDOWN \u2192 NEW BUILD IGNITION';
+  document.getElementById('mission-sub').textContent = live
+    ? 'Glider project wrapped. Ignition confirmed on the next build. Watch this space.'
+    : 'The deployable-wing glider is wrapping up. When this clock hits zero, it lands in the books and the next build lights up.';
+}
+tickClock();
+setInterval(tickClock, 1000);
 
 const tickerItems = [
-  "SYSTEM STATUS: NOMINAL","ACTIVE PROJECTS: 7","STRUCTURAL MARGIN: WITHIN TOLERANCE",
-  "TAMU SOUNDING ROCKETRY: TARGET ALTITUDE 10,000 FT","RASC-AL: NATIONAL FINALIST",
+  "SYSTEM STATUS: NOMINAL","NEXT MISSION: INBOUND","ACTIVE PROJECTS: 7","STRUCTURAL MARGIN: WITHIN TOLERANCE",
+  "TAMU SOUNDING ROCKETRY: TARGET APOGEE 11,500 FT","RASC-AL: NATIONAL FINALIST",
   "FABRICATION: 3D PRINTING / COMPOSITES / MACHINING","TELEMETRY LINK: ACTIVE"
 ];
 const track = document.getElementById('ticker');
@@ -229,8 +284,11 @@ const projects = [
     "Coordinated systems integration across the full architecture: a TRIDENT-derived rotary-percussive drill for subsurface sampling, a modular storage system spanning unconditioned, refrigerated, and cryogenic containment, a VSAT-inspired vertical solar array feeding a 2 km high-voltage tether, and an SMA-tire rover on an Obverse-Reverse Four-Link suspension for traversing permanently shadowed craters.",
     "As team lead, authored the technical paper submitted to NASA (estimated total mission cost ~$686M) and guided the team to national-finalist status among 14 teams."],
    photos:[{caption:"Site-selection trade study across candidate Artemis landing regions."},{caption:"Sample collection and cryogenic storage architecture concept."},{caption:"Team NOVA at RASC-AL nationals."}]},
-  {slug:"sounding-rocketry", title:"TAMU Sounding Rocketry", meta:"Valor Engineering Lead · 8 engineers", status:"active", tools:["SolidWorks","ANSYS / FEA"],
-   body:["Leading structural design and integration for a high-powered rocket targeting 10,000 ft. Designing and validating airframe components with FEA, balancing structural margin, mass, and manufacturability, and coordinating fabrication across composite layups, metal machining, and additive manufacturing."],
+  {slug:"sounding-rocketry", title:"TAMU Sounding Rocketry", meta:"Technical Lead · Structures · Team Valor (8 engineers)", status:"active", tools:["SolidWorks","OpenRocket","ANSYS / FEA","Composites","Machining"],
+   body:[
+    "Leading an 8-engineer structures team on Team Valor's high-powered rocket, targeting an 11,500 ft apogee while carrying a live video relay payload. I own the airframe architecture, the mass budget, and the interfaces where structures meets propulsion, avionics, and recovery, so a change in one bay doesn't ripple unchecked through the rest of the rocket.",
+    "On the design side, I model and validate the airframe, fin attachment, and motor mount in SolidWorks and ANSYS FEA, balancing structural margin, mass, and manufacturability. Mass estimates feed directly into OpenRocket, where they shape the flight simulations behind motor selection.",
+    "As technical lead, I run the team on a milestone cadence (architecture, interface freeze, design freeze, then PDR and CDR) and deliver CAD, materials selections, mass breakdowns, BOMs, and manufacturing plans at each weekly checkpoint. Fabrication spans 3D printing, composite layups, and metal machining, so each part gets the joining method and process that suits it."],
    photos:[{caption:"Add a caption for this photo."},{caption:"Add a caption for this photo."},{caption:"Add a caption for this photo."}]},
   {slug:"space-teams-pro", title:"Space Teams Pro", meta:"Software Development · Python", status:"complete", tools:["Python","Simulation Design","UI / Gadget Development"],
    body:[
@@ -241,9 +299,15 @@ const projects = [
   {slug:"piston-engine", title:"Pneumatic Piston Engine", meta:"Independent project · Fusion 360", status:"complete", tools:["Fusion 360","3D Printing"],
    body:["Designed and 3D-printed a functional compressed-air propulsion prototype, applying two- and four-stroke thermodynamic principles to optimize the linear-to-rotary motion conversion."],
    photos:[{caption:"Add a caption for this photo."},{caption:"Add a caption for this photo."},{caption:"Add a caption for this photo."}]},
-  {slug:"biofilament", title:"Biofilament & Microstructure Research", meta:"Researcher", status:"active", tools:["SolidWorks","ABAQUS"],
-   body:["Investigating biofilament-based microstructures for space structures through modeling, fabrication, and experimental testing, with FEA in ABAQUS to evaluate and optimize structural behavior."],
-   photos:[{caption:"Add a caption for this photo."},{caption:"Add a caption for this photo."},{caption:"Add a caption for this photo."}]},
+  {slug:"biofilament", title:"Biofilament & Microstructure Research", meta:"Researcher · Lightweight space structures", status:"active", tools:["SolidWorks","ABAQUS","3D Printing","Bio-based PLA"],
+   body:[
+    "Designing 3D-printed, bio-based PLA microstructures for lightweight space structures: curved, shell-based lattices built to carry more load per gram than conventional solid-infill PLA, which is the benchmark every design is measured against.",
+    "Each lattice is tuned around a relative density of about 20%, unit cells of 5\u201310 mm, and 1.2 mm walls. I model the geometry in SolidWorks, then run FEA in ABAQUS to predict stress distribution and buckling behavior. The design targets are a 30 MPa stress limit and a buckling load at least 1.5\u20132\u00d7 the expected compressive load.",
+    "The goal is a measurable win in specific stiffness and specific strength (stiffness-to-mass and strength-to-mass) over solid-infill PLA, checked by printing the lattices and testing them mechanically."],
+   photos:[
+    {contain:true, caption:"Tiled unit cells in isometric view, showing the continuous curved-wall geometry."},
+    {contain:true, caption:"Diagonal view of the lattice, showing its symmetric, open-channel structure."},
+    {contain:true, caption:"Front view with through-channels that remove mass while keeping continuous load paths."}]},
   {slug:"vex-robotics", title:"VEX Robotics", meta:"Team Lead · 4-year tenure", status:"complete", tools:["Drivetrain Design","Mechanisms"],
    body:["Led a 5-person team to qualification for the VEX Robotics World Championship, engineering drivetrains, high-velocity launchers, and passive manipulation mechanisms."],
    photos:[{caption:"Add a caption for this photo."},{caption:"Add a caption for this photo."},{caption:"Add a caption for this photo."}]}
@@ -289,7 +353,7 @@ function buildPhotoList(slug, photos){
     const item = document.createElement('div');
     item.className = 'photo-item';
     const frame = document.createElement('div');
-    frame.className = 'photo-frame';
+    frame.className = 'photo-frame' + (p.contain ? ' contain' : '');
     const filename = `projects/${slug}-${n}.jpg`;
     const img = document.createElement('img');
     img.src = filename;
